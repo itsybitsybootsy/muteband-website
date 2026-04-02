@@ -1145,13 +1145,29 @@
             <div class="footer-logo"><span>MUTE</span>BAND</div>
             <p>&copy; 2026 MuteBand. All rights reserved.</p>
             <div class="footer-links">
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
-                <a href="#">Contact</a>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="impressum.html">Impressum</a>
+                <a href="mailto:info@muteband.eu">Contact</a>
             </div>
+            <p style="color: var(--text-dim); font-size: 0.625rem; font-weight: 300; margin-top: 1.25rem; line-height: 1.6; max-width: 480px; margin-left: auto; margin-right: auto;">MuteBand is a student business project developed at Theresianum Wien. This project is educational in nature and may not result in a commercially available product.</p>
         </div>
     </footer>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script>
+    // TODO: Replace with your Firebase config
+    firebase.initializeApp({
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT.firebasestorage.app",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    });
+    var db = firebase.firestore();
+    </script>
     <script>
     (function() {
         'use strict';
@@ -1351,20 +1367,17 @@
         }, { threshold: 0.5 });
         statNumbers.forEach(function(el) { statsObserver.observe(el); });
 
-        // ===== WAITLIST LOGIC =====
+        // ===== WAITLIST LOGIC (Firebase Firestore) =====
         var counterEl = document.getElementById('waitlistCounter');
         var waitlistCount = 0;
 
-        // Fetch real count from server
-        fetch('/api/waitlist/count')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                waitlistCount = data.count;
-                counterEl.textContent = waitlistCount.toLocaleString();
-            })
-            .catch(function() {
-                counterEl.textContent = '0';
-            });
+        // Fetch count from Firestore
+        db.collection('waitlist').get().then(function(snapshot) {
+            waitlistCount = snapshot.size;
+            counterEl.textContent = waitlistCount.toLocaleString();
+        }).catch(function() {
+            counterEl.textContent = '0';
+        });
 
         // Form handling
         var form = document.getElementById('waitlistForm');
@@ -1387,26 +1400,15 @@
             btn.textContent = '...';
             btn.disabled = true;
 
-            fetch('/api/waitlist', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email })
-            })
-            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-            .then(function(res) {
-                if (!res.ok) {
-                    formError.textContent = res.data.error;
-                    formError.style.display = 'block';
-                    btn.textContent = 'Join';
-                    btn.disabled = false;
-                    return;
-                }
-                waitlistCount = res.data.count;
+            db.collection('waitlist').add({
+                email: email,
+                date: new Date().toISOString()
+            }).then(function() {
+                waitlistCount++;
                 counterEl.textContent = waitlistCount.toLocaleString();
                 form.style.display = 'none';
                 formSuccess.style.display = 'block';
-            })
-            .catch(function() {
+            }).catch(function() {
                 formError.textContent = 'Something went wrong. Please try again.';
                 formError.style.display = 'block';
                 btn.textContent = 'Join';

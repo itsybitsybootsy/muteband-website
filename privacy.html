@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — MuteBand</title>
+    <meta name="description" content="Privacy Policy for MuteBand. Learn how we handle your data.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23080808' stroke='%2300FF88' stroke-width='4'/><circle cx='50' cy='50' r='8' fill='%2300FF88'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060608;
+            --surface: #0c0c10;
+            --surface-light: #131318;
+            --accent: #00FF88;
+            --accent-dim: #00cc6a;
+            --accent-glow: rgba(0, 255, 136, 0.25);
+            --text: #e8e8ec;
+            --text-muted: #8a8a96;
+            --text-dim: #4a4a56;
+            --border: rgba(255, 255, 255, 0.05);
+            --font-primary: 'Poppins', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --container: 760px;
+            --gutter: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        ::selection { background: rgba(0, 255, 136, 0.2); color: #fff; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #1a1a22; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+        html { scroll-behavior: smooth; scrollbar-color: #1a1a22 var(--bg); }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.25rem 0;
+            background: rgba(6, 6, 8, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 var(--gutter);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .nav-back {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: color 0.3s;
+        }
+        .nav-back:hover { color: var(--accent); }
+        .nav-logo {
+            font-family: var(--font-primary);
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: 0.06em;
+        }
+        .nav-logo span { color: var(--accent); }
+
+        /* CONTENT */
+        .container {
+            max-width: var(--container);
+            margin: 0 auto;
+            padding: 0 var(--gutter);
+        }
+
+        .policy {
+            padding: 8rem 0 4rem;
+        }
+
+        .policy-label {
+            font-family: var(--font-mono);
+            font-size: 0.6875rem;
+            letter-spacing: 0.3em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .policy h1 {
+            font-family: var(--font-primary);
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+        }
+
+        .policy-updated {
+            color: var(--text-dim);
+            font-size: 0.8125rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+        }
+
+        .policy h2 {
+            font-family: var(--font-primary);
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-top: 2.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .policy h2 .num {
+            font-family: var(--font-mono);
+            color: var(--accent);
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+
+        .policy p {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            font-weight: 300;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .policy ul {
+            list-style: none;
+            margin-bottom: 1rem;
+            padding-left: 0;
+        }
+
+        .policy ul li {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            font-weight: 300;
+            line-height: 1.8;
+            padding-left: 1.25rem;
+            position: relative;
+        }
+
+        .policy ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.75em;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .policy a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .policy a:hover { color: #33ffaa; }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 3rem 0;
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            position: relative;
+        }
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+        }
+        .footer-logo {
+            font-family: var(--font-primary);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.06em;
+        }
+        .footer-logo span { color: var(--accent); }
+        footer p {
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            font-weight: 300;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.25rem;
+        }
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 400;
+            transition: color 0.3s;
+            letter-spacing: 0.02em;
+        }
+        .footer-links a:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-inner">
+            <div class="nav-left">
+                <a href="index.html" class="nav-back" aria-label="Back to home">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+                </a>
+                <a href="index.html" class="nav-logo"><span>MUTE</span>BAND</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PRIVACY POLICY -->
+    <section class="policy">
+        <div class="container">
+            <p class="policy-label">// legal</p>
+            <h1>Privacy Policy</h1>
+            <p class="policy-updated">Last updated: April 2, 2026</p>
+
+            <h2><span class="num">01</span> Who we are</h2>
+            <p>MuteBand is a student business project by Lucas Lammer, Teoman Civici, Yoto Krastev, and William Ye, developed at Theresianum Wien, Favoritenstra&szlig;e 15, 1040 Wien, Austria.</p>
+            <p>Contact: <a href="mailto:info@muteband.eu">info@muteband.eu</a></p>
+
+            <h2><span class="num">02</span> What data we collect</h2>
+            <p>When you join our waitlist, we collect:</p>
+            <ul>
+                <li>Your email address</li>
+                <li>The date and time of your submission</li>
+            </ul>
+            <p>We do not collect any other personal data. We do not use cookies for tracking purposes.</p>
+
+            <h2><span class="num">03</span> Why we collect it (Legal basis)</h2>
+            <p>We collect your email address based on your consent (Art. 6(1)(a) GDPR) when you voluntarily submit it through our waitlist form. The purpose is to notify you about MuteBand product updates and availability.</p>
+
+            <h2><span class="num">04</span> How we store it</h2>
+            <p>Your data is stored in Google Firebase (Firestore), operated by Google LLC. Google Firebase servers may be located in the EU or US. Google is certified under the EU-US Data Privacy Framework. For more information, see <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener noreferrer">Google's privacy policy</a>.</p>
+
+            <h2><span class="num">05</span> Who has access</h2>
+            <p>Only the MuteBand project team members (listed above) have access to the collected email addresses. We do not sell, share, or transfer your data to any other third parties.</p>
+
+            <h2><span class="num">06</span> How long we keep it</h2>
+            <p>We retain your email address for the duration of the MuteBand project. If the project is discontinued, all collected data will be deleted.</p>
+
+            <h2><span class="num">07</span> Your rights</h2>
+            <p>Under GDPR, you have the right to:</p>
+            <ul>
+                <li>Access your personal data</li>
+                <li>Rectify inaccurate data</li>
+                <li>Request deletion of your data</li>
+                <li>Withdraw your consent at any time</li>
+                <li>Lodge a complaint with the Austrian Data Protection Authority (Datenschutzbeh&ouml;rde)</li>
+            </ul>
+            <p>To exercise any of these rights, contact us at <a href="mailto:info@muteband.eu">info@muteband.eu</a>.</p>
+
+            <h2><span class="num">08</span> Third-party services</h2>
+            <ul>
+                <li><strong>Google Fonts:</strong> We use Google Fonts for typography. This may transmit your IP address to Google servers. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's privacy policy</a> for details.</li>
+                <li><strong>Google Firebase:</strong> Used for storing waitlist submissions. See section 4.</li>
+            </ul>
+
+            <h2><span class="num">09</span> Changes to this policy</h2>
+            <p>We may update this privacy policy from time to time. The latest version will always be available on this page.</p>
+
+            <h2><span class="num">10</span> Note</h2>
+            <p>This is a school project developed at Theresianum Wien. The website and its data collection serve educational and demonstration purposes and may not lead to a commercial product.</p>
+
+            <div class="divider"></div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-logo"><span>MUTE</span>BAND</div>
+            <p>&copy; 2026 MuteBand. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="privacy.html">Privacy</a>
+                <a href="impressum.html">Impressum</a>
+                <a href="index.html">Home</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

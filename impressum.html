@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuteBand — Impressum</title>
+    <meta name="description" content="Impressum for MuteBand. Legal disclosure according to Austrian law (§ 5 ECG / § 25 MedienG).">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23080808' stroke='%2300FF88' stroke-width='4'/><circle cx='50' cy='50' r='8' fill='%2300FF88'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060608;
+            --surface: #0c0c10;
+            --surface-light: #131318;
+            --accent: #00FF88;
+            --accent-dim: #00cc6a;
+            --accent-glow: rgba(0, 255, 136, 0.25);
+            --accent-ghost: rgba(0, 255, 136, 0.06);
+            --text: #e8e8ec;
+            --text-muted: #8a8a96;
+            --text-dim: #4a4a56;
+            --border: rgba(255, 255, 255, 0.05);
+            --font-primary: 'Poppins', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --container: 1140px;
+            --gutter: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        ::selection { background: rgba(0, 255, 136, 0.2); color: #fff; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #1a1a22; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+        html { scroll-behavior: smooth; scrollbar-color: #1a1a22 var(--bg); }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.25rem 0;
+            background: rgba(6, 6, 8, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: var(--container);
+            margin: 0 auto;
+            padding: 0 var(--gutter);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .nav-back {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        .nav-back:hover {
+            color: var(--accent);
+            border-color: rgba(0, 255, 136, 0.15);
+            background: var(--accent-ghost);
+        }
+        .nav-logo {
+            font-family: var(--font-primary);
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: 0.06em;
+        }
+        .nav-logo span { color: var(--accent); }
+
+        /* ===== CONTENT ===== */
+        .container {
+            max-width: var(--container);
+            margin: 0 auto;
+            padding: 0 var(--gutter);
+        }
+        .impressum {
+            padding: 8rem 0 5rem;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .impressum h1 {
+            font-family: var(--font-primary);
+            font-weight: 700;
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+        .impressum h1 .accent {
+            color: var(--accent);
+        }
+        .impressum .subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            letter-spacing: 0.04em;
+            margin-bottom: 3rem;
+        }
+        .impressum-section {
+            margin-bottom: 2.5rem;
+        }
+        .impressum-section h2 {
+            font-family: var(--font-primary);
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--accent);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+        .impressum-section p,
+        .impressum-section a {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            line-height: 1.75;
+        }
+        .impressum-section a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .impressum-section a:hover {
+            color: #33ffaa;
+        }
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+            margin: 2.5rem 0;
+            position: relative;
+        }
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.08), transparent);
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            position: relative;
+        }
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+        }
+        .footer-logo {
+            font-family: var(--font-primary);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.06em;
+        }
+        .footer-logo span { color: var(--accent); }
+        footer p {
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            font-weight: 300;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.25rem;
+        }
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 400;
+            transition: color 0.3s;
+            letter-spacing: 0.02em;
+        }
+        .footer-links a:hover { color: var(--accent); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .impressum {
+                padding: 7rem 0 3rem;
+            }
+            .impressum h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-inner">
+            <div class="nav-left">
+                <a href="index.html" class="nav-back" aria-label="Back to home">&larr;</a>
+                <a href="index.html" class="nav-logo"><span>MUTE</span>BAND</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- IMPRESSUM -->
+    <div class="container">
+        <div class="impressum">
+            <h1>Impressum<span class="accent">.</span></h1>
+            <p class="subtitle">// legal disclosure</p>
+
+            <div class="impressum-section">
+                <p>Information according to &sect; 5 ECG and &sect; 25 MedienG:</p>
+                <p><strong style="color: var(--text); font-weight: 500;">MuteBand</strong><br>
+                A school project by students of Theresianum Wien</p>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="impressum-section">
+                <h2>Responsible Persons</h2>
+                <p>Lucas Lammer, Teoman Civici, Yoto Krastev, William Ye</p>
+            </div>
+
+            <div class="impressum-section">
+                <h2>Address</h2>
+                <p>Theresianum Wien<br>
+                Favoritenstra&szlig;e 15<br>
+                1040 Wien, Austria</p>
+            </div>
+
+            <div class="impressum-section">
+                <h2>Contact</h2>
+                <p><a href="mailto:info@muteband.eu">info@muteband.eu</a></p>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="impressum-section">
+                <h2>Disclaimer</h2>
+                <p>MuteBand is a student business project developed as part of the entrepreneurship program at Theresianum Wien. This project is educational in nature and may not result in a commercially available product. All information on this website is provided for demonstration and educational purposes.</p>
+            </div>
+
+            <div class="impressum-section">
+                <h2>Liability for Content</h2>
+                <p>The content of this website has been created with the greatest possible care. However, we cannot guarantee the accuracy, completeness, or timeliness of the content.</p>
+            </div>
+
+            <div class="impressum-section">
+                <h2>Liability for Links</h2>
+                <p>Our website may contain links to external third-party websites over whose content we have no influence. We therefore cannot accept any liability for such external content.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-logo"><span>MUTE</span>BAND</div>
+            <p>&copy; 2026 MuteBand. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="impressum.html">Impressum</a>
+                <a href="index.html">Home</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
