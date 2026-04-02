@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuteBand — Be Inaudible.</title>
+    <meta name="description" content="MuteBand emits inaudible ultrasonic frequencies that neutralize nearby microphones. Protect your conversations. Own your privacy.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23080808' stroke='%2300FF88' stroke-width='4'/><circle cx='50' cy='50' r='8' fill='%2300FF88'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060608;
+            --surface: #0c0c10;
+            --surface-light: #131318;
+            --accent: #00FF88;
+            --accent-dim: #00cc6a;
+            --accent-glow: rgba(0, 255, 136, 0.25);
+            --accent-ghost: rgba(0, 255, 136, 0.06);
+            --text: #e8e8ec;
+            --text-muted: #8a8a96;
+            --text-dim: #4a4a56;
+            --border: rgba(255, 255, 255, 0.05);
+            --font-primary: 'Poppins', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --section-pad: clamp(5rem, 12vh, 9rem);
+            --container: 1140px;
+            --gutter: clamp(1.5rem, 4vw, 2.5rem);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        ::selection { background: rgba(0, 255, 136, 0.2); color: #fff; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #1a1a22; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+        html { scroll-behavior: smooth; scrollbar-color: #1a1a22 var(--bg); }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Scanline overlay */
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.03) 2px,
+                rgba(0, 0, 0, 0.03) 4px
+            );
+        }
+
+        /* Scroll progress */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--accent);
+            z-index: 10001;
+            transition: width 0.08s linear;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .container {
+            max-width: var(--container);
+            margin: 0 auto;
+            padding: 0 var(--gutter);
+        }
+
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.6875rem;
+            letter-spacing: 0.3em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 1.25rem;
+            animation: flutterGreen 3s ease-in-out infinite;
+        }
+
+        .section-title {
+            font-family: var(--font-primary);
+            font-size: clamp(1.875rem, 4vw, 3rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 1.25rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-desc {
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 300;
+            max-width: 520px;
+            line-height: 1.75;
+        }
+
+        /* Reveal animation */
+        [data-reveal] {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        [data-reveal].revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== KEYFRAMES ===== */
+        @keyframes pulseGreen {
+            0%, 100% { box-shadow: 0 0 8px var(--accent-glow), 0 0 24px rgba(0, 255, 136, 0.1); }
+            50% { box-shadow: 0 0 20px var(--accent-glow), 0 0 60px rgba(0, 255, 136, 0.15), 0 0 100px rgba(0, 255, 136, 0.05); }
+        }
+
+        @keyframes flutterGreen {
+            0%, 100% { opacity: 1; }
+            25% { opacity: 0.7; }
+            50% { opacity: 1; }
+            75% { opacity: 0.85; }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { text-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+            50% { text-shadow: 0 0 40px rgba(0, 255, 136, 0.5), 0 0 80px rgba(0, 255, 136, 0.2); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes labelIn {
+            from { opacity: 0; letter-spacing: 0.6em; }
+            to { opacity: 1; letter-spacing: 0.3em; }
+        }
+
+        @keyframes bandIn {
+            from { opacity: 0; transform: scale(0.8) rotate(-5deg); }
+            to { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes wavePulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(2.8); opacity: 0; }
+        }
+
+        @keyframes ledPulse {
+            0%, 100% { box-shadow: 0 0 8px var(--accent), 0 0 20px var(--accent-glow); }
+            50% { box-shadow: 0 0 16px var(--accent), 0 0 40px var(--accent-glow), 0 0 70px rgba(0,255,136,0.08); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { border-color: rgba(0, 255, 136, 0.08); }
+            50% { border-color: rgba(0, 255, 136, 0.2); }
+        }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.25rem 0;
+            transition: all 0.4s ease;
+        }
+        nav.scrolled {
+            background: rgba(6, 6, 8, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.875rem 0;
+        }
+        .nav-inner {
+            max-width: var(--container);
+            margin: 0 auto;
+            padding: 0 var(--gutter);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-logo {
+            font-family: var(--font-primary);
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: 0.06em;
+        }
+        .nav-logo span { color: var(--accent); }
+        .nav-cta {
+            font-family: var(--font-primary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--bg);
+            background: var(--accent);
+            padding: 0.55rem 1.4rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.3s;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .nav-cta:hover {
+            background: #33ffaa;
+            box-shadow: 0 0 24px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        /* ===== HERO ===== */
+        #hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 7rem 0 4rem;
+            overflow: hidden;
+        }
+        #particleCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.7;
+        }
+        .hero-gradient {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 250px;
+            background: linear-gradient(to bottom, transparent, var(--bg));
+            z-index: 2;
+        }
+        .hero-vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 40%, var(--bg) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            max-width: var(--container);
+            margin: 0 auto;
+            padding: 0 var(--gutter);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 4rem;
+        }
+        .hero-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: labelIn 0.8s ease forwards 0.3s;
+        }
+        .hero-text h1 {
+            font-family: var(--font-primary);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: slideUp 0.9s ease forwards 0.6s;
+        }
+        .hero-text h1 span {
+            color: var(--accent);
+            animation: glowPulse 4s ease-in-out infinite;
+        }
+        .hero-desc {
+            color: var(--text-muted);
+            font-size: 1.0625rem;
+            font-weight: 300;
+            line-height: 1.8;
+            max-width: 440px;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            animation: slideUp 0.9s ease forwards 0.9s;
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-family: var(--font-primary);
+            font-weight: 600;
+            font-size: 0.8125rem;
+            color: var(--bg);
+            background: var(--accent);
+            padding: 0.9rem 2rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.35s ease;
+            opacity: 0;
+            animation: slideUp 0.9s ease forwards 1.2s;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .btn-primary:hover {
+            background: #33ffaa;
+            transform: translateY(-2px);
+            box-shadow: 0 0 32px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .btn-primary svg { transition: transform 0.3s; }
+        .btn-primary:hover svg { transform: translateX(3px); }
+
+        /* Wristband Visual */
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            animation: bandIn 1.2s ease forwards 0.5s;
+        }
+        .band-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .band-body {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            border: 16px solid #151519;
+            position: relative;
+            background: transparent;
+            box-shadow:
+                inset 0 2px 6px rgba(255,255,255,0.04),
+                inset 0 -3px 8px rgba(0,0,0,0.6),
+                0 0 60px rgba(0, 255, 136, 0.08),
+                0 0 120px rgba(0, 255, 136, 0.03),
+                0 30px 60px rgba(0,0,0,0.7);
+            animation: pulseGreen 4s ease-in-out infinite;
+        }
+        .band-body::before {
+            content: '';
+            position: absolute;
+            inset: -16px;
+            border-radius: 50%;
+            border: 16px solid transparent;
+            background: linear-gradient(145deg, rgba(50,50,60,0.3), transparent 40%) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .band-led {
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: ledPulse 2.5s ease-in-out infinite;
+        }
+        .band-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-mono);
+            font-size: 0.45rem;
+            letter-spacing: 0.2em;
+            color: rgba(0, 255, 136, 0.15);
+            text-transform: uppercase;
+        }
+        .wave-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 170px;
+            height: 170px;
+            margin-top: -85px;
+            margin-left: -85px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 255, 136, 0.25);
+            animation: wavePulse 3.5s ease-out infinite;
+        }
+        .wave-ring:nth-child(2) { animation-delay: 0.7s; }
+        .wave-ring:nth-child(3) { animation-delay: 1.4s; }
+        .wave-ring:nth-child(4) { animation-delay: 2.1s; }
+        .wave-ring:nth-child(5) { animation-delay: 2.8s; }
+        .band-shadow {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 16px;
+            background: radial-gradient(ellipse, rgba(0,255,136,0.08), transparent 70%);
+            filter: blur(10px);
+        }
+
+        /* ===== WAITLIST ===== */
+        #waitlist {
+            padding: var(--section-pad) 0;
+            position: relative;
+            text-align: center;
+        }
+        #waitlist::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0,255,136,0.04), transparent 65%);
+            pointer-events: none;
+        }
+        .waitlist-counter { margin-bottom: 1rem; }
+        .counter-value {
+            font-family: var(--font-mono);
+            font-size: clamp(2.75rem, 5.5vw, 4rem);
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+            animation: glowPulse 4s ease-in-out infinite;
+        }
+        .counter-label {
+            font-family: var(--font-primary);
+            color: var(--text-dim);
+            font-size: 0.875rem;
+            font-weight: 300;
+            margin-top: 0.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .waitlist-title {
+            font-family: var(--font-primary);
+            font-size: clamp(1.625rem, 3vw, 2.25rem);
+            font-weight: 700;
+            margin: 2rem 0 0.75rem;
+            letter-spacing: -0.01em;
+        }
+        .waitlist-desc {
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 300;
+            max-width: 440px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.75;
+        }
+        .form-wrap { max-width: 480px; margin: 0 auto; }
+        .form-group {
+            display: flex;
+            border: 1px solid rgba(0, 255, 136, 0.12);
+            border-radius: 4px;
+            overflow: hidden;
+            background: var(--surface);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-group:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.08), 0 0 20px rgba(0, 255, 136, 0.06);
+        }
+        .form-group input {
+            flex: 1;
+            padding: 1rem 1.25rem;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-family: var(--font-primary);
+            font-size: 0.875rem;
+            font-weight: 300;
+            outline: none;
+            min-width: 0;
+        }
+        .form-group input::placeholder { color: var(--text-dim); }
+        .form-group button {
+            padding: 1rem 1.5rem;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            font-family: var(--font-primary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .form-group button:hover { background: #33ffaa; }
+        .form-note {
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            font-weight: 300;
+            margin-top: 1rem;
+            letter-spacing: 0.02em;
+        }
+        .form-error {
+            color: #ff4466;
+            font-size: 0.8125rem;
+            margin-top: 0.75rem;
+            display: none;
+        }
+        .form-success {
+            display: none;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        .form-success .success-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 1.25rem;
+        }
+        .form-success h3 {
+            font-family: var(--font-primary);
+            font-size: 1.375rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .form-success p {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            font-weight: 300;
+        }
+
+        /* ===== STATS / PROBLEM ===== */
+        #problem {
+            padding: var(--section-pad) 0;
+            position: relative;
+        }
+        #problem::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -200px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(0,255,136,0.025), transparent 70%);
+            pointer-events: none;
+        }
+        .problem-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .problem-header .section-desc { margin: 0 auto; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .stat-card:hover::after { opacity: 0.5; }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(0, 255, 136, 0.1);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 30px rgba(0,255,136,0.03);
+        }
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: var(--accent-ghost);
+            border: 1px solid rgba(0, 255, 136, 0.08);
+        }
+        .stat-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .stat-value {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 2px;
+            margin-bottom: 0.75rem;
+        }
+        .stat-number {
+            font-family: var(--font-mono);
+            font-size: clamp(2rem, 3.5vw, 2.75rem);
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+        }
+        .stat-suffix {
+            font-family: var(--font-mono);
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            font-weight: 500;
+            color: var(--accent);
+        }
+        .stat-card p {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        /* Espionage callout */
+        .espionage-callout {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            padding: 3rem 2rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .espionage-callout::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.4;
+        }
+        .espionage-callout .stat-value { margin-bottom: 0.5rem; }
+        .espionage-callout .stat-number { font-size: clamp(3rem, 6vw, 4.5rem); }
+        .espionage-callout .stat-suffix { font-size: clamp(1.5rem, 3vw, 2.5rem); }
+        .espionage-callout p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 300;
+            line-height: 1.7;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+        .espionage-callout cite {
+            display: block;
+            color: var(--text-dim);
+            font-size: 0.6875rem;
+            font-style: normal;
+            font-family: var(--font-mono);
+            margin-top: 1rem;
+            letter-spacing: 0.04em;
+        }
+
+        /* ===== FEATURES ===== */
+        #features {
+            padding: var(--section-pad) 0;
+            position: relative;
+        }
+        .features-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .features-header .section-desc { margin: 0 auto; }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+        }
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2.25rem;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 24px;
+            right: 24px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.3), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-card:hover {
+            border-color: rgba(0, 255, 136, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 20px rgba(0,255,136,0.02);
+        }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: var(--accent-ghost);
+            border: 1px solid rgba(0, 255, 136, 0.08);
+            margin-bottom: 1.5rem;
+        }
+        .feature-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .feature-card h3 {
+            font-family: var(--font-primary);
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.625rem;
+            letter-spacing: -0.01em;
+        }
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        #how {
+            padding: var(--section-pad) 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        #how::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.15), transparent);
+        }
+        .how-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+        .how-header .section-desc { margin: 0 auto; }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            position: relative;
+        }
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 34px;
+            left: calc(16.66% + 34px);
+            right: calc(16.66% + 34px);
+            height: 1px;
+            background: linear-gradient(90deg, var(--accent), rgba(0,255,136,0.15), var(--accent));
+        }
+        .step {
+            text-align: center;
+            position: relative;
+        }
+        .step-num {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 1px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.75rem;
+            position: relative;
+            z-index: 2;
+            transition: all 0.4s;
+        }
+        .step:hover .step-num {
+            box-shadow: 0 0 24px var(--accent-glow);
+            border-color: #33ffaa;
+        }
+        .step-num svg {
+            width: 26px;
+            height: 26px;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .step h3 {
+            font-family: var(--font-primary);
+            font-size: 1.0625rem;
+            font-weight: 600;
+            margin-bottom: 0.625rem;
+        }
+        .step p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 300;
+            line-height: 1.65;
+            max-width: 260px;
+            margin: 0 auto;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            position: relative;
+        }
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+        }
+        .footer-logo {
+            font-family: var(--font-primary);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.06em;
+        }
+        .footer-logo span { color: var(--accent); }
+        footer p {
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            font-weight: 300;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.25rem;
+        }
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 400;
+            transition: color 0.3s;
+            letter-spacing: 0.02em;
+        }
+        .footer-links a:hover { color: var(--accent); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .hero-content { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+            .hero-text h1 br { display: none; }
+            .hero-desc { margin-left: auto; margin-right: auto; }
+            .btn-primary { margin: 0 auto; }
+            .band-container { width: 260px; height: 260px; }
+            .band-body { width: 140px; height: 140px; border-width: 14px; }
+            .wave-ring { width: 140px; height: 140px; margin-top: -70px; margin-left: -70px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+            .stat-card { padding: 1.5rem 1.25rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; gap: 2.5rem; }
+            .steps::before { display: none; }
+            .form-group { flex-direction: column; border-radius: 4px; }
+            .form-group input { padding: 1rem 1.25rem; }
+            .form-group button { padding: 1rem; }
+            .hero-label { font-size: 0.625rem; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .band-container { width: 220px; height: 220px; }
+            .band-body { width: 120px; height: 120px; border-width: 12px; }
+            .wave-ring { width: 120px; height: 120px; margin-top: -60px; margin-left: -60px; }
+            .nav-cta { padding: 0.45rem 1rem; font-size: 0.6875rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- NAV -->
+    <nav id="nav">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo"><span>MUTE</span>BAND</a>
+            <a href="#waitlist" class="nav-cta">Join Waitlist</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section id="hero">
+        <canvas id="particleCanvas"></canvas>
+        <div class="hero-vignette"></div>
+        <div class="hero-gradient"></div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <p class="hero-label">// privacy redefined</p>
+                <h1>Be<br><span>Inaudible.</span></h1>
+                <p class="hero-desc">MuteBand emits inaudible ultrasonic frequencies that neutralize nearby microphones. Wear it. Activate it. Own your silence.</p>
+                <a href="#waitlist" class="btn-primary">
+                    Join the Waitlist
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+            </div>
+            <div class="hero-visual">
+                <div class="band-container">
+                    <div class="wave-ring"></div>
+                    <div class="wave-ring"></div>
+                    <div class="wave-ring"></div>
+                    <div class="wave-ring"></div>
+                    <div class="wave-ring"></div>
+                    <div class="band-body">
+                        <div class="band-led"></div>
+                        <div class="band-label">MB-01</div>
+                    </div>
+                    <div class="band-shadow"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WAITLIST -->
+    <section id="waitlist">
+        <div class="container">
+            <div data-reveal>
+                <div class="waitlist-counter">
+                    <div class="counter-value" id="waitlistCounter">0</div>
+                    <p class="counter-label">on the waitlist</p>
+                </div>
+                <h2 class="waitlist-title">Be First in Line</h2>
+                <p class="waitlist-desc">MuteBand is coming soon. Join the waitlist and be among the first to reclaim your audio privacy.</p>
+                <div class="form-wrap">
+                    <form id="waitlistForm">
+                        <div class="form-group">
+                            <input type="email" id="emailInput" placeholder="Enter your email" required autocomplete="email">
+                            <button type="submit">Join</button>
+                        </div>
+                        <p class="form-note">No spam, ever. Unsubscribe anytime.</p>
+                        <p class="form-error" id="formError"></p>
+                    </form>
+                    <div class="form-success" id="formSuccess">
+                        <div class="success-icon">
+                            <svg width="56" height="56" viewBox="0 0 64 64" fill="none">
+                                <circle cx="32" cy="32" r="30" stroke="#00FF88" stroke-width="1.5"/>
+                                <path d="M20 32l8 8 16-16" stroke="#00FF88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h3>You're on the list.</h3>
+                        <p>We'll notify you the moment MuteBand is ready to ship.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROBLEM / STATS -->
+    <section id="problem">
+        <div class="container">
+            <div class="problem-header" data-reveal>
+                <p class="section-label">// the problem</p>
+                <h2 class="section-title">Privacy Is Under Siege</h2>
+                <p class="section-desc">We live surrounded by microphones. Every smartphone, smart speaker, and laptop is a potential recording device — often without your knowledge or consent.</p>
+            </div>
+            <div class="espionage-callout" data-reveal>
+                <div class="stat-value">
+                    <span class="stat-suffix">$</span>
+                    <span class="stat-number" data-count="225">0</span>
+                    <span class="stat-suffix">B+</span>
+                </div>
+                <p>lost every year to corporate espionage in the United States alone — stolen trade secrets, wiretapped meetings, leaked strategies</p>
+                <cite>Source: Commission on the Theft of American Intellectual Property</cite>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card" data-reveal>
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
+                    </div>
+                    <div class="stat-value">
+                        <span class="stat-number" data-count="80">0</span>
+                        <span class="stat-suffix">%</span>
+                    </div>
+                    <p>of smartphones can be remotely activated to record conversations</p>
+                </div>
+                <div class="stat-card" data-reveal>
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    </div>
+                    <div class="stat-value">
+                        <span class="stat-number" data-count="5.3" data-float="true">0</span>
+                        <span class="stat-suffix">B</span>
+                    </div>
+                    <p>people carry a potential recording device with them every single day</p>
+                </div>
+                <div class="stat-card" data-reveal>
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <div class="stat-value">
+                        <span class="stat-number" data-count="33">0</span>
+                        <span class="stat-suffix">%</span>
+                    </div>
+                    <p>of employees report having been recorded at work without their consent</p>
+                </div>
+                <div class="stat-card" data-reveal>
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                    </div>
+                    <div class="stat-value">
+                        <span class="stat-number" data-count="14">0</span>
+                        <span class="stat-suffix">+</span>
+                    </div>
+                    <p>times per day the average person is captured on audio without knowing</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features">
+        <div class="container">
+            <div class="features-header" data-reveal>
+                <p class="section-label">// the solution</p>
+                <h2 class="section-title">Engineered for Silence</h2>
+                <p class="section-desc">MuteBand uses advanced ultrasonic technology to create an invisible shield around your conversations.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card" data-reveal>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
+                    </div>
+                    <h3>Ultrasonic Shield</h3>
+                    <p>Emits precision-tuned ultrasonic frequencies that overload microphone sensors, making your voice unrecordable by any nearby device.</p>
+                </div>
+                <div class="feature-card" data-reveal>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/><path d="M8 3.5A9 9 0 0 1 21 11"/></svg>
+                    </div>
+                    <h3>One-Tap Control</h3>
+                    <p>Activate or deactivate your privacy shield instantly with a single tap. No apps, no pairing, no complexity — just immediate protection.</p>
+                </div>
+                <div class="feature-card" data-reveal>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    </div>
+                    <h3>Stealth Design</h3>
+                    <p>Looks like a premium fitness tracker. No one will know you are wearing a privacy device — complete discretion in any setting.</p>
+                </div>
+                <div class="feature-card" data-reveal>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="6" opacity="0.6"/><circle cx="12" cy="12" r="10" opacity="0.3"/></svg>
+                    </div>
+                    <h3>3-Meter Radius</h3>
+                    <p>Effective coverage in a 3-meter radius around you. Protect entire meeting rooms, private dinners, or personal conversations effortlessly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how">
+        <div class="container">
+            <div class="how-header" data-reveal>
+                <p class="section-label">// simple by design</p>
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-desc">Privacy protection should be effortless. MuteBand works in three simple steps.</p>
+            </div>
+            <div class="steps">
+                <div class="step" data-reveal>
+                    <div class="step-num">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" opacity="0.2"/><path d="M12 2a4 4 0 0 0-4 4v4h8V6a4 4 0 0 0-4-4z" opacity="0.5"/><rect x="4" y="10" width="16" height="10" rx="2"/><circle cx="12" cy="15" r="1.5"/></svg>
+                    </div>
+                    <h3>Wear It</h3>
+                    <p>Slide MuteBand on your wrist like any premium bracelet. Lightweight, comfortable, built for all-day wear.</p>
+                </div>
+                <div class="step" data-reveal>
+                    <div class="step-num">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" opacity="0.15"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v1m0 6v1m-4-4h1m6 0h1"/></svg>
+                    </div>
+                    <h3>Tap to Activate</h3>
+                    <p>A single tap activates ultrasonic emission. The subtle LED confirms you are shielded. One more tap to deactivate.</p>
+                </div>
+                <div class="step" data-reveal>
+                    <div class="step-num">
+                        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                    </div>
+                    <h3>You're Protected</h3>
+                    <p>Every microphone within range is neutralized. Speak freely, knowing your words stay between the people in the room.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-logo"><span>MUTE</span>BAND</div>
+            <p>&copy; 2026 MuteBand. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // ===== PARTICLE & WAVE CANVAS =====
+        var canvas = document.getElementById('particleCanvas');
+        var ctx = canvas.getContext('2d');
+        var time = 0;
+        var particles = [];
+        var mouseX = -1000;
+        var mouseY = -1000;
+
+        function resizeCanvas() {
+            var dpr = window.devicePixelRatio || 1;
+            var rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            initParticles(rect.width, rect.height);
+        }
+
+        function initParticles(w, h) {
+            particles = [];
+            var count = Math.floor((w * h) / 8000);
+            count = Math.min(count, 120);
+            for (var i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: -Math.random() * 0.5 - 0.1,
+                    size: Math.random() * 1.5 + 0.5,
+                    opacity: Math.random() * 0.4 + 0.1,
+                    flicker: Math.random() * Math.PI * 2
+                });
+            }
+        }
+
+        // Horizontal wave lines
+        var waves = [
+            { amp: 40, freq: 0.006, speed: 0.015, opacity: 0.1, yOffset: 0 },
+            { amp: 25, freq: 0.01, speed: 0.02, opacity: 0.07, yOffset: 25 },
+            { amp: 50, freq: 0.004, speed: 0.012, opacity: 0.05, yOffset: -15 },
+            { amp: 18, freq: 0.014, speed: 0.028, opacity: 0.08, yOffset: 45 },
+        ];
+
+        canvas.parentElement.addEventListener('mousemove', function(e) {
+            var rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+        canvas.parentElement.addEventListener('mouseleave', function() {
+            mouseX = -1000;
+            mouseY = -1000;
+        });
+
+        function drawScene() {
+            var w = canvas.getBoundingClientRect().width;
+            var h = canvas.getBoundingClientRect().height;
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw wave lines
+            waves.forEach(function(wave) {
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(0, 255, 136, ' + wave.opacity + ')';
+                ctx.lineWidth = 1;
+                for (var x = 0; x <= w; x += 3) {
+                    var y = h * 0.5 + wave.yOffset
+                        + Math.sin(x * wave.freq + time * wave.speed) * wave.amp
+                        + Math.sin(x * wave.freq * 0.5 + time * wave.speed * 1.3) * wave.amp * 0.3;
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            });
+
+            // Draw and update particles
+            for (var i = 0; i < particles.length; i++) {
+                var p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.flicker += 0.03;
+
+                // Wrap around
+                if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
+                if (p.x < -10) p.x = w + 10;
+                if (p.x > w + 10) p.x = -10;
+
+                // Mouse interaction
+                var dx = p.x - mouseX;
+                var dy = p.y - mouseY;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 100) {
+                    var force = (100 - dist) / 100;
+                    p.x += dx * force * 0.02;
+                    p.y += dy * force * 0.02;
+                }
+
+                var flickerOpacity = p.opacity * (0.7 + Math.sin(p.flicker) * 0.3);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 255, 136, ' + flickerOpacity + ')';
+                ctx.fill();
+            }
+
+            // Subtle connection lines between close particles
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.03)';
+            ctx.lineWidth = 0.5;
+            for (var a = 0; a < particles.length; a++) {
+                for (var b = a + 1; b < particles.length; b++) {
+                    var ddx = particles[a].x - particles[b].x;
+                    var ddy = particles[a].y - particles[b].y;
+                    var d = ddx * ddx + ddy * ddy;
+                    if (d < 8000) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            time++;
+            requestAnimationFrame(drawScene);
+        }
+
+        resizeCanvas();
+        drawScene();
+        window.addEventListener('resize', resizeCanvas);
+
+        // ===== NAV SCROLL =====
+        var nav = document.getElementById('nav');
+        function checkNav() {
+            nav.classList.toggle('scrolled', window.scrollY > 60);
+        }
+
+        // ===== SCROLL PROGRESS =====
+        var progressBar = document.getElementById('scrollProgress');
+        function updateProgress() {
+            var scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+            progressBar.style.width = Math.min(scrolled * 100, 100) + '%';
+        }
+
+        window.addEventListener('scroll', function() {
+            checkNav();
+            updateProgress();
+        }, { passive: true });
+        checkNav();
+
+        // ===== INTERSECTION OBSERVER =====
+        var reveals = document.querySelectorAll('[data-reveal]');
+        var revealObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    var children = entry.target.parentElement.querySelectorAll('[data-reveal]');
+                    var idx = 0;
+                    children.forEach(function(child) {
+                        if (child === entry.target) return;
+                        idx++;
+                    });
+                    entry.target.style.transitionDelay = (idx * 0.1) + 's';
+                    entry.target.classList.add('revealed');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+        reveals.forEach(function(el) { revealObserver.observe(el); });
+
+        // ===== COUNTER ANIMATION =====
+        function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+        function animateCount(element, target, duration, isFloat) {
+            var start = performance.now();
+            function update(now) {
+                var elapsed = now - start;
+                var progress = Math.min(elapsed / duration, 1);
+                var eased = easeOutCubic(progress);
+                var current = eased * target;
+                element.textContent = isFloat ? current.toFixed(1) : Math.floor(current);
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        // Stats counters
+        var statNumbers = document.querySelectorAll('.stat-number[data-count]');
+        var statsObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    var el = entry.target;
+                    var target = parseFloat(el.getAttribute('data-count'));
+                    var isFloat = el.hasAttribute('data-float');
+                    animateCount(el, target, 2000, isFloat);
+                    statsObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.5 });
+        statNumbers.forEach(function(el) { statsObserver.observe(el); });
+
+        // ===== WAITLIST LOGIC =====
+        var counterEl = document.getElementById('waitlistCounter');
+        var waitlistCount = 0;
+
+        // Fetch real count from server
+        fetch('/api/waitlist/count')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                waitlistCount = data.count;
+                counterEl.textContent = waitlistCount.toLocaleString();
+            })
+            .catch(function() {
+                counterEl.textContent = '0';
+            });
+
+        // Form handling
+        var form = document.getElementById('waitlistForm');
+        var emailInput = document.getElementById('emailInput');
+        var formError = document.getElementById('formError');
+        var formSuccess = document.getElementById('formSuccess');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var email = emailInput.value.trim();
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!emailRegex.test(email)) {
+                formError.textContent = 'Please enter a valid email address.';
+                formError.style.display = 'block';
+                return;
+            }
+
+            var btn = form.querySelector('button');
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            fetch('/api/waitlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+                if (!res.ok) {
+                    formError.textContent = res.data.error;
+                    formError.style.display = 'block';
+                    btn.textContent = 'Join';
+                    btn.disabled = false;
+                    return;
+                }
+                waitlistCount = res.data.count;
+                counterEl.textContent = waitlistCount.toLocaleString();
+                form.style.display = 'none';
+                formSuccess.style.display = 'block';
+            })
+            .catch(function() {
+                formError.textContent = 'Something went wrong. Please try again.';
+                formError.style.display = 'block';
+                btn.textContent = 'Join';
+                btn.disabled = false;
+            });
+        });
+
+        emailInput.addEventListener('input', function() {
+            formError.style.display = 'none';
+        });
+
+        // ===== SMOOTH SCROLL =====
+        document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+            anchor.addEventListener('click', function(e) {
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+    })();
+    </script>
+</body>
+</html>
