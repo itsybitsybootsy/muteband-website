@@ -63,19 +63,6 @@
             );
         }
 
-        /* Scroll progress */
-        .scroll-progress {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 0%;
-            height: 2px;
-            background: var(--accent);
-            z-index: 10001;
-            transition: width 0.08s linear;
-            box-shadow: 0 0 12px var(--accent-glow);
-        }
-
         .container {
             max-width: var(--container);
             margin: 0 auto;
@@ -151,11 +138,6 @@
         @keyframes bandIn {
             from { opacity: 0; transform: scale(0.8) rotate(-5deg); }
             to { opacity: 1; transform: scale(1) rotate(0deg); }
-        }
-
-        @keyframes wavePulse {
-            0% { transform: scale(1); opacity: 0.5; }
-            100% { transform: scale(2.8); opacity: 0; }
         }
 
         @keyframes ledPulse {
@@ -345,28 +327,30 @@
             justify-content: center;
             align-items: center;
         }
+
+        /* The band itself */
         .band-body {
-            width: 170px;
-            height: 170px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            border: 16px solid #151519;
+            border: 14px solid #1a1a20;
             position: relative;
+            z-index: 3;
             background: transparent;
             box-shadow:
-                inset 0 2px 6px rgba(255,255,255,0.04),
+                inset 0 2px 6px rgba(255,255,255,0.05),
                 inset 0 -3px 8px rgba(0,0,0,0.6),
-                0 0 60px rgba(0, 255, 136, 0.08),
-                0 0 120px rgba(0, 255, 136, 0.03),
-                0 30px 60px rgba(0,0,0,0.7);
+                0 0 40px rgba(0, 255, 136, 0.1),
+                0 0 80px rgba(0, 255, 136, 0.04);
             animation: pulseGreen 4s ease-in-out infinite;
         }
         .band-body::before {
             content: '';
             position: absolute;
-            inset: -16px;
+            inset: -14px;
             border-radius: 50%;
-            border: 16px solid transparent;
-            background: linear-gradient(145deg, rgba(50,50,60,0.3), transparent 40%) border-box;
+            border: 14px solid transparent;
+            background: linear-gradient(145deg, rgba(60,60,70,0.35), transparent 40%) border-box;
             -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
@@ -374,14 +358,15 @@
         }
         .band-led {
             position: absolute;
-            top: -4px;
+            top: -3px;
             left: 50%;
             transform: translateX(-50%);
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: var(--accent);
             animation: ledPulse 2.5s ease-in-out infinite;
+            z-index: 4;
         }
         .band-label {
             position: absolute;
@@ -389,36 +374,110 @@
             left: 50%;
             transform: translate(-50%, -50%);
             font-family: var(--font-mono);
-            font-size: 0.45rem;
+            font-size: 0.4rem;
             letter-spacing: 0.2em;
             color: rgba(0, 255, 136, 0.15);
             text-transform: uppercase;
         }
-        .wave-ring {
+
+        /* Microphone silhouettes around the band */
+        .mic-target {
+            position: absolute;
+            z-index: 1;
+            opacity: 0.25;
+            transition: opacity 0.3s;
+        }
+        .mic-target svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--text-dim);
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .mic-target:nth-child(1) { top: 15px; right: 30px; }
+        .mic-target:nth-child(2) { bottom: 40px; right: 20px; transform: rotate(15deg); }
+        .mic-target:nth-child(3) { bottom: 30px; left: 30px; transform: rotate(-10deg); }
+        .mic-target:nth-child(4) { top: 25px; left: 40px; transform: rotate(-20deg); }
+
+        /* Strike-through on each mic */
+        .mic-target::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -2px;
+            right: -2px;
+            height: 2px;
+            background: var(--accent);
+            transform: rotate(-45deg);
+            opacity: 0;
+            animation: strikeFlash 3s ease-in-out infinite;
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+        .mic-target:nth-child(1)::after { animation-delay: 0s; }
+        .mic-target:nth-child(2)::after { animation-delay: 0.75s; }
+        .mic-target:nth-child(3)::after { animation-delay: 1.5s; }
+        .mic-target:nth-child(4)::after { animation-delay: 2.25s; }
+
+        @keyframes strikeFlash {
+            0%, 30% { opacity: 0; }
+            35% { opacity: 1; }
+            70% { opacity: 0.7; }
+            100% { opacity: 0; }
+        }
+
+        /* Ultrasonic disruption arcs from band to mics */
+        .disrupt-arc {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 170px;
-            height: 170px;
-            margin-top: -85px;
-            margin-left: -85px;
+            width: 200px;
+            height: 200px;
+            margin-top: -100px;
+            margin-left: -100px;
             border-radius: 50%;
-            border: 1px solid rgba(0, 255, 136, 0.25);
-            animation: wavePulse 3.5s ease-out infinite;
+            border: 1px solid transparent;
+            border-top-color: rgba(0, 255, 136, 0.3);
+            border-right-color: rgba(0, 255, 136, 0.15);
+            z-index: 2;
+            animation: disruptSpin 6s linear infinite;
         }
-        .wave-ring:nth-child(2) { animation-delay: 0.7s; }
-        .wave-ring:nth-child(3) { animation-delay: 1.4s; }
-        .wave-ring:nth-child(4) { animation-delay: 2.1s; }
-        .wave-ring:nth-child(5) { animation-delay: 2.8s; }
+        .disrupt-arc:nth-child(6) {
+            width: 240px;
+            height: 240px;
+            margin-top: -120px;
+            margin-left: -120px;
+            border-top-color: rgba(0, 255, 136, 0.15);
+            border-right-color: rgba(0, 255, 136, 0.08);
+            animation-duration: 8s;
+            animation-direction: reverse;
+        }
+        .disrupt-arc:nth-child(7) {
+            width: 280px;
+            height: 280px;
+            margin-top: -140px;
+            margin-left: -140px;
+            border-top-color: rgba(0, 255, 136, 0.08);
+            border-right-color: transparent;
+            animation-duration: 10s;
+        }
+
+        @keyframes disruptSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .band-shadow {
             position: absolute;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            width: 120px;
-            height: 16px;
-            background: radial-gradient(ellipse, rgba(0,255,136,0.08), transparent 70%);
+            width: 100px;
+            height: 14px;
+            background: radial-gradient(ellipse, rgba(0,255,136,0.06), transparent 70%);
             filter: blur(10px);
+            z-index: 0;
         }
 
         /* ===== WAITLIST ===== */
@@ -1132,13 +1191,13 @@
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
-            .hero-content { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+            .hero-content { grid-template-columns: 1fr; text-align: center; gap: 2rem; }
             .hero-text h1 br { display: none; }
             .hero-desc { margin-left: auto; margin-right: auto; }
             .btn-primary { margin: 0 auto; }
-            .band-container { width: 260px; height: 260px; }
-            .band-body { width: 140px; height: 140px; border-width: 14px; }
-            .wave-ring { width: 140px; height: 140px; margin-top: -70px; margin-left: -70px; }
+            .band-container { width: 240px; height: 240px; }
+            .band-body { width: 100px; height: 100px; border-width: 12px; }
+            .mic-target svg { width: 26px; height: 26px; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
@@ -1160,18 +1219,25 @@
         }
 
         @media (max-width: 480px) {
+            #hero { min-height: auto; padding: 6rem 0 3rem; }
+            .hero-text h1 { font-size: 2.25rem; margin-bottom: 1rem; }
+            .hero-desc { font-size: 0.9375rem; margin-bottom: 1.75rem; }
             .stats-grid { grid-template-columns: 1fr; }
-            .band-container { width: 220px; height: 220px; }
-            .band-body { width: 120px; height: 120px; border-width: 12px; }
-            .wave-ring { width: 120px; height: 120px; margin-top: -60px; margin-left: -60px; }
+            .band-container { width: 200px; height: 200px; }
+            .band-body { width: 90px; height: 90px; border-width: 10px; }
+            .mic-target svg { width: 22px; height: 22px; }
+            .mic-target:nth-child(1) { top: 10px; right: 20px; }
+            .mic-target:nth-child(2) { bottom: 25px; right: 15px; }
+            .mic-target:nth-child(3) { bottom: 20px; left: 20px; }
+            .mic-target:nth-child(4) { top: 15px; left: 25px; }
+            .disrupt-arc { width: 160px; height: 160px; margin-top: -80px; margin-left: -80px; }
+            .disrupt-arc:nth-child(6) { width: 190px; height: 190px; margin-top: -95px; margin-left: -95px; }
+            .disrupt-arc:nth-child(7) { width: 200px; height: 200px; margin-top: -100px; margin-left: -100px; }
             .nav-cta { padding: 0.55rem 1.1rem; font-size: 0.6875rem; min-height: 44px; display: inline-flex; align-items: center; }
             .waitlist-title { font-size: 1.375rem; }
             .waitlist-desc { font-size: 0.9375rem; }
             .counter-value { font-size: 2.5rem; }
             .section-title { font-size: 1.625rem; }
-            .espionage-callout { padding: 2rem 1.25rem; }
-            .espionage-callout .stat-number { font-size: 2.5rem; }
-            .espionage-callout .stat-suffix { font-size: 1.25rem; }
             footer { padding: 2.5rem 0; }
             footer p { font-size: 0.6875rem; }
         }
@@ -1179,8 +1245,6 @@
 </head>
 <body>
     <div class="scanlines"></div>
-    <div class="scroll-progress" id="scrollProgress"></div>
-
     <!-- NAV -->
     <nav id="nav">
         <div class="nav-inner">
@@ -1206,11 +1270,16 @@
             </div>
             <div class="hero-visual">
                 <div class="band-container">
-                    <div class="wave-ring"></div>
-                    <div class="wave-ring"></div>
-                    <div class="wave-ring"></div>
-                    <div class="wave-ring"></div>
-                    <div class="wave-ring"></div>
+                    <!-- Mic silhouettes being blocked -->
+                    <div class="mic-target"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div>
+                    <div class="mic-target"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div>
+                    <div class="mic-target"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div>
+                    <div class="mic-target"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div>
+                    <!-- Disruption arcs -->
+                    <div class="disrupt-arc"></div>
+                    <div class="disrupt-arc"></div>
+                    <div class="disrupt-arc"></div>
+                    <!-- Band -->
                     <div class="band-body">
                         <div class="band-led"></div>
                         <div class="band-label">MB-01</div>
@@ -1600,11 +1669,7 @@
         }
 
         // ===== SCROLL PROGRESS =====
-        var progressBar = document.getElementById('scrollProgress');
-        function updateProgress() {
-            var scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-            progressBar.style.width = Math.min(scrolled * 100, 100) + '%';
-        }
+        function updateProgress() {}
 
         window.addEventListener('scroll', function() {
             checkNav();
