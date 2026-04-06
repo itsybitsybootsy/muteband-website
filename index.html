@@ -707,7 +707,7 @@
         .problem-header .section-desc { margin: 0 auto; }
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 1.25rem;
         }
         .stat-card {
@@ -1185,7 +1185,7 @@
             <div class="hero-text">
                 <p class="hero-label">// privacy redefined</p>
                 <h1>Go<br><span>Off Record.</span></h1>
-                <p class="hero-desc">MuteBand makes sure no device around you can record your voice. A wearable ultrasonic shield for conversations that stay yours.</p>
+                <p class="hero-desc">MuteBand makes sure no device around you can record your voice. A wearable ultrasonic shield for assured privacy.</p>
                 <a href="#waitlist" class="btn-primary">
                     Join the Waitlist
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -1256,16 +1256,7 @@
             <div class="problem-header" data-reveal>
                 <p class="section-label">// the problem</p>
                 <h2 class="section-title">You're Being Recorded Right Now</h2>
-                <p class="section-desc">Your phone is listening. Your colleague's laptop is listening. The smart speaker in the meeting room is listening. Every private word you say is one software update away from being stored forever.</p>
-            </div>
-            <div class="espionage-callout" data-reveal>
-                <div class="stat-value">
-                    <span class="stat-suffix">$</span>
-                    <span class="stat-number" data-count="225">0</span>
-                    <span class="stat-suffix">B+</span>
-                </div>
-                <p>stolen every year through wiretapped meetings, leaked calls, and corporate espionage. One overheard conversation can end a career, kill a deal, or destroy a company.</p>
-                <cite>Source: Commission on the Theft of American Intellectual Property</cite>
+                <p class="section-desc">Your phone is listening. Your meeting room is listening. Your office is listening. And right now, nothing is stopping it.</p>
             </div>
             <div class="stats-grid">
                 <div class="stat-card" data-reveal>
@@ -1273,40 +1264,34 @@
                         <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
                     </div>
                     <div class="stat-value">
-                        <span class="stat-number" data-count="80">0</span>
-                        <span class="stat-suffix">%</span>
+                        <span class="stat-number" data-count="60">0</span>
+                        <span class="stat-suffix">%+</span>
                     </div>
-                    <p>of smartphones can be silently turned into remote microphones — yours included, without a single notification</p>
+                    <p>of mobile users have microphone access enabled for apps that don't even need it. Your phone is listening, and you said yes without knowing.</p>
+                    <cite>(Consumer Reports, 2024)</cite>
                 </div>
                 <div class="stat-card" data-reveal>
                     <div class="stat-icon">
                         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                     </div>
                     <div class="stat-value">
-                        <span class="stat-number" data-count="5.3" data-float="true">0</span>
-                        <span class="stat-suffix">B</span>
+                        <span class="stat-number" data-count="50000">0</span>
+                        <span class="stat-suffix">+</span>
                     </div>
-                    <p>people unknowingly carry a listening device in their pocket every single day — and trust it with their most private moments</p>
+                    <p>Phone numbers targeted by Pegasus spyware in 50+ countries. Full microphone access. No notification.</p>
+                    <cite>(Amnesty International / Forbidden Stories, 2021)</cite>
                 </div>
                 <div class="stat-card" data-reveal>
                     <div class="stat-icon">
                         <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
                     <div class="stat-value">
-                        <span class="stat-number" data-count="33">0</span>
-                        <span class="stat-suffix">%</span>
+                        <span class="stat-suffix">$</span>
+                        <span class="stat-number" data-count="600">0</span>
+                        <span class="stat-suffix">B</span>
                     </div>
-                    <p>of employees have been secretly recorded at work. Private conversations, salary talks, personal calls — all captured without consent</p>
-                </div>
-                <div class="stat-card" data-reveal>
-                    <div class="stat-icon">
-                        <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-                    </div>
-                    <div class="stat-value">
-                        <span class="stat-number" data-count="14">0</span>
-                        <span class="stat-suffix">+</span>
-                    </div>
-                    <p>times per day your voice is captured by a device you didn't know was recording. That's 14 moments you can never take back</p>
+                    <p>lost annually to trade secret theft and corporate espionage. One overheard conversation can end a career, kill a deal, or destroy a company.</p>
+                    <cite>(IP Commission / FBI)</cite>
                 </div>
             </div>
         </div>
@@ -1643,7 +1628,8 @@
                 var progress = Math.min(elapsed / duration, 1);
                 var eased = easeOutCubic(progress);
                 var current = eased * target;
-                element.textContent = isFloat ? current.toFixed(1) : Math.floor(current);
+                var val = isFloat ? current.toFixed(1) : Math.floor(current).toLocaleString();
+                element.textContent = val;
                 if (progress < 1) requestAnimationFrame(update);
             }
             requestAnimationFrame(update);
