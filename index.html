@@ -392,26 +392,27 @@
             pointer-events: none;
         }
         .hidden-mic svg {
-            width: 24px;
-            height: 24px;
-            stroke: var(--text-dim);
-            fill: none;
-            stroke-width: 1.5;
+            width: 38px;
+            height: 38px;
+            stroke: #8a8a9a;
+            fill: rgba(138, 138, 154, 0.15);
+            stroke-width: 2;
             stroke-linecap: round;
             stroke-linejoin: round;
+            filter: drop-shadow(0 0 4px rgba(138, 138, 154, 0.3));
         }
         /* Strike line over each mic */
         .hidden-mic::after {
             content: '';
             position: absolute;
             top: 50%;
-            left: -3px;
-            right: -3px;
-            height: 2px;
+            left: -4px;
+            right: -4px;
+            height: 2.5px;
             background: var(--accent);
             transform: rotate(-45deg);
             opacity: 0;
-            box-shadow: 0 0 6px rgba(0,255,136,0.4);
+            box-shadow: 0 0 8px rgba(0,255,136,0.5);
         }
         /* Positions — spread around the band at different distances */
         .hidden-mic:nth-child(6) { top: 20px; right: 35px; }
@@ -428,8 +429,8 @@
 
         @keyframes micReveal {
             0%, 10% { opacity: 0; }
-            15% { opacity: 0.35; }
-            25% { opacity: 0.25; }
+            15% { opacity: 0.55; }
+            25% { opacity: 0.4; }
             35%, 100% { opacity: 0; }
         }
         @keyframes micStrike {
