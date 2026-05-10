@@ -1704,11 +1704,20 @@
             requestAnimationFrame(step);
         }
 
-        db.collection('waitlist').get().then(function(snap) {
+        var authForCount = firebase.auth().currentUser
+            ? Promise.resolve()
+            : firebase.auth().signInAnonymously().catch(function(err) {
+                console.warn('[waitlist count] anon auth failed:', err);
+            });
+
+        authForCount.then(function() {
+            return db.collection('waitlist').get();
+        }).then(function(snap) {
             targetCount = snap.size + COUNT_OFFSET;
             waitlistCount.classList.add('ready');
             animateCount(targetCount);
-        }).catch(function() {
+        }).catch(function(err) {
+            console.warn('[waitlist count] read failed:', err);
             targetCount = COUNT_OFFSET;
             countNum.textContent = COUNT_OFFSET.toLocaleString('en-US') + '+';
             displayedCount = targetCount;
