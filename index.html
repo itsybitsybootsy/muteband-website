@@ -1704,16 +1704,11 @@
             requestAnimationFrame(step);
         }
 
-        var authForCount = firebase.auth().currentUser
-            ? Promise.resolve()
-            : firebase.auth().signInAnonymously().catch(function(err) {
-                console.warn('[waitlist count] anon auth failed:', err);
-            });
+        var statsRef = db.doc('stats/waitlist');
 
-        authForCount.then(function() {
-            return db.collection('waitlist').get();
-        }).then(function(snap) {
-            targetCount = snap.size + COUNT_OFFSET;
+        statsRef.get().then(function(doc) {
+            var n = (doc.exists && typeof doc.data().count === 'number') ? doc.data().count : 0;
+            targetCount = n + COUNT_OFFSET;
             waitlistCount.classList.add('ready');
             animateCount(targetCount);
         }).catch(function(err) {
@@ -1748,6 +1743,12 @@
                 return db.collection('waitlist').add({
                     email: email,
                     date: new Date().toISOString()
+                }).then(function() {
+                    return statsRef.set({
+                        count: firebase.firestore.FieldValue.increment(1)
+                    }, { merge: true }).catch(function(err) {
+                        console.warn('[waitlist count] increment failed:', err);
+                    });
                 });
             };
             var authPromise = firebase.auth().currentUser
