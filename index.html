@@ -954,6 +954,50 @@
             margin: 0 auto 2.5rem;
             line-height: 1.7;
         }
+        .waitlist-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            margin: -0.5rem auto 2.25rem;
+            padding: 0.5rem 1rem 0.5rem 0.875rem;
+            border: 1px solid var(--rule);
+            border-radius: 999px;
+            background: var(--bg);
+            font-family: var(--font-mono);
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .waitlist-count.ready { opacity: 1; transform: translateY(0); }
+        .count-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            position: relative;
+            flex-shrink: 0;
+        }
+        .count-dot::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.35;
+            animation: countPulse 2.2s ease-out infinite;
+        }
+        @keyframes countPulse {
+            0% { transform: scale(0.6); opacity: 0.45; }
+            100% { transform: scale(2.4); opacity: 0; }
+        }
+        .count-num {
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            font-variant-numeric: tabular-nums;
+        }
         .form-wrap { max-width: 480px; margin: 0 auto; }
         .form-group {
             display: flex;
@@ -1543,6 +1587,10 @@
                 <span class="waitlist-tag">First batch — limited</span>
                 <h2 class="waitlist-title">Get on the list.</h2>
                 <p class="waitlist-desc">We ship in batches. The list gets first call.</p>
+                <div class="waitlist-count" id="waitlistCount" aria-live="polite">
+                    <span class="count-dot" aria-hidden="true"></span>
+                    <span><span class="count-num" id="countNum">—</span> already reserved</span>
+                </div>
                 <div class="form-wrap">
                     <form id="waitlistForm">
                         <div class="form-group">
@@ -1635,6 +1683,38 @@
         var formError = document.getElementById('formError');
         var formSuccess = document.getElementById('formSuccess');
 
+        var countNum = document.getElementById('countNum');
+        var waitlistCount = document.getElementById('waitlistCount');
+        var displayedCount = 0;
+        var targetCount = 0;
+        var COUNT_OFFSET = 100;
+
+        function animateCount(to) {
+            var from = displayedCount;
+            var duration = Math.min(1600, 400 + Math.abs(to - from) * 6);
+            var t0 = performance.now();
+            function step(now) {
+                var p = Math.min(1, (now - t0) / duration);
+                var eased = 1 - Math.pow(1 - p, 3);
+                var val = Math.round(from + (to - from) * eased);
+                countNum.textContent = val.toLocaleString('en-US');
+                if (p < 1) requestAnimationFrame(step);
+                else displayedCount = to;
+            }
+            requestAnimationFrame(step);
+        }
+
+        db.collection('waitlist').get().then(function(snap) {
+            targetCount = snap.size + COUNT_OFFSET;
+            waitlistCount.classList.add('ready');
+            animateCount(targetCount);
+        }).catch(function() {
+            targetCount = COUNT_OFFSET;
+            countNum.textContent = COUNT_OFFSET.toLocaleString('en-US') + '+';
+            displayedCount = targetCount;
+            waitlistCount.classList.add('ready');
+        });
+
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             var email = emailInput.value.trim();
@@ -1668,6 +1748,8 @@
             authPromise.then(doWrite).then(function() {
                 form.style.display = 'none';
                 formSuccess.classList.add('show');
+                targetCount += 1;
+                animateCount(targetCount);
             }).catch(function() {
                 formError.textContent = 'Something went wrong. Please try again.';
                 formError.style.display = 'block';
